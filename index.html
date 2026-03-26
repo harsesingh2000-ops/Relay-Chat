@@ -202,8 +202,10 @@ function Av({name,initials,size,online}){
 }
 function Dots(){return (<div style={{display:"flex",gap:4,padding:"4px 0"}}>{[0,1,2].map(function(i){return (<div key={i} style={{width:6,height:6,borderRadius:"50%",background:C.accent,animation:"tb 1.4s "+i*0.2+"s infinite"}}/>)})}</div>)}
 function BNav({active,onNav}){
+  var callIcon=<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>;
+  var playIcon=<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>;
   var bolt=<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>;
-  return (<div style={{display:"flex",justifyContent:"space-around",padding:"10px 0 16px",background:C.surface,borderTop:"1px solid "+C.border}}>{[{k:"chats",i:I.home,l:"Chats"},{k:"tools",i:bolt,l:"Tools"},{k:"translate",i:I.translate,l:"Lang"},{k:"profile",i:I.user,l:"Me"}].map(function(x){return (<div key={x.k} onClick={function(){onNav(x.k)}} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:active===x.k?C.accent:C.textMuted,cursor:"pointer"}}>{x.i}<span style={{fontFamily:FM,fontSize:8,letterSpacing:0.5}}>{x.l}</span></div>)})}</div>);
+  return (<div style={{display:"flex",justifyContent:"space-around",padding:"10px 0 16px",background:C.surface,borderTop:"1px solid "+C.border}}>{[{k:"chats",i:I.home,l:"Chats"},{k:"calls",i:callIcon,l:"Calls"},{k:"entertainment",i:playIcon,l:"Fun"},{k:"tools",i:bolt,l:"Tools"}].map(function(x){return (<div key={x.k} onClick={function(){onNav(x.k)}} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,color:active===x.k?C.accent:C.textMuted,cursor:"pointer",transition:"color 0.2s"}}>{x.i}<span style={{fontFamily:FM,fontSize:8,letterSpacing:0.5}}>{x.l}</span></div>)})}</div>);
 }
 
 // ══════ MESSAGE BUBBLE ══════
@@ -247,7 +249,7 @@ function Splash({onDone}){
 }
 
 // ══════ CHAT VIEW ══════
-function ChatView({contact,myLang,netMode,translateSettings,onSetTranslate,onBack}){
+function ChatView({contact,myLang,netMode,translateSettings,onSetTranslate,onBack,onOpenProfile}){
   var[msg,setMsg]=useState("");
   var[msgs,setMsgs]=useState([]);
   var[typing,setTyping]=useState(false);
@@ -394,7 +396,7 @@ function ChatView({contact,myLang,netMode,translateSettings,onSetTranslate,onBac
       {/* Chat Header */}
       <div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 14px 10px",borderBottom:"1px solid "+C.border,background:C.surface}}>
         <button onClick={onBack} style={{background:"none",border:"none",color:C.accent,cursor:"pointer",padding:4}}>{I.back}</button>
-        <Av name={contact.name} initials={contact.av} size={40} online={contact.online}/>
+        <div onClick={onOpenProfile} style={{cursor:"pointer"}}><Av name={contact.name} initials={contact.av} size={40} online={contact.online}/></div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:F,fontWeight:700,fontSize:16,color:C.text}}>{contact.name}</div>
           <div style={{fontFamily:FM,fontSize:10,color:cantSend?"#ff9f1a":contact.online?"#2ed573":C.textMuted}}>{cantSend?"⏳ queued · sends when online":contact.online?"online":"last seen 5m ago"}</div>
@@ -487,7 +489,6 @@ function ChatList({myLang,netMode,translateSettings,onToggle,onSelect,onNav}){
                 <div style={{width:6,height:6,borderRadius:"50%",background:isOn?"#3b82f6":"#ff9f1a",animation:"pulse 2s infinite"}}/>
                 <span style={{fontFamily:FM,fontSize:10,color:isOn?"#3b82f6":"#ff9f1a",letterSpacing:1.5}}>{isOn?"ONLINE":"CELLULAR"}</span>
               </div>
-              <div onClick={function(){onNav("translate")}} style={{display:"inline-flex",alignItems:"center",gap:4,background:C.accentGlow,padding:"3px 12px",borderRadius:20,cursor:"pointer",border:"1px solid rgba(0,229,160,0.2)"}}><span style={{fontSize:13}}>{myL.flag}</span><span style={{fontFamily:FM,fontSize:10,color:C.accent,letterSpacing:1}}>I SPEAK {myL.name.toUpperCase()}</span></div>
             </div>
           </div>
           <button onClick={function(){setSo(!so)}} style={{background:so?C.accentGlow:C.card,border:"none",borderRadius:12,padding:10,color:so?C.accent:C.textDim,cursor:"pointer"}}>{I.search}</button>
@@ -522,7 +523,7 @@ function ChatList({myLang,netMode,translateSettings,onToggle,onSelect,onNav}){
           return (<div key={c.id} onClick={function(){onSelect(c)}} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 12px",borderRadius:16,cursor:"pointer",borderBottom:"1px solid "+C.border,animation:"su 0.25s "+i*0.04+"s both"}}>
             <Av name={c.name} initials={c.av} size={50} online={c.online}/>
             <div style={{flex:1,minWidth:0}}>
-              <div style={{display:"flex",justifyContent:"space-between"}}><div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:F,fontWeight:600,fontSize:15,color:C.text}}>{c.name}</span><span style={{fontSize:13}}>{f}</span>{cantSend&&<span style={{fontFamily:FM,fontSize:8,color:"#ff9f1a",background:"rgba(255,159,26,0.1)",padding:"1px 6px",borderRadius:6,letterSpacing:0.5}}>QUEUED</span>}</div><span style={{fontFamily:FM,fontSize:10,color:c.unread?C.accent:C.textMuted}}>{c.time}</span></div>
+              <div style={{display:"flex",justifyContent:"space-between"}}><div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:F,fontWeight:600,fontSize:15,color:C.text}}>{c.name}</span>{cantSend&&<span style={{fontFamily:FM,fontSize:8,color:"#ff9f1a",background:"rgba(255,159,26,0.1)",padding:"1px 6px",borderRadius:6,letterSpacing:0.5}}>QUEUED</span>}</div><span style={{fontFamily:FM,fontSize:10,color:c.unread?C.accent:C.textMuted}}>{c.time}</span></div>
               <div style={{marginTop:4}}><div style={{fontFamily:F,fontSize:13,color:C.textDim,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t}</div>{d&&<div style={{fontFamily:F,fontSize:11,color:C.textMuted,fontStyle:"italic",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",marginTop:2,opacity:0.5}}>{c.msg}</div>}</div>
             </div>
             {c.unread>0&&<div style={{minWidth:20,height:20,borderRadius:10,background:C.accent,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FM,fontSize:10,fontWeight:700,color:"#000",padding:"0 6px"}}>{c.unread}</div>}
@@ -584,6 +585,321 @@ function LS({myLang,netMode,onChange,onBack}){
       </div>)})}
     </div>
     <BNav active="translate" onNav={onBack}/>
+  </div>);
+}
+
+// ══════ CALLS TAB ══════
+function CallsScreen({netMode,onNav}){
+  var[tab,setTab]=useState("recent");
+  var isOn=netMode==="online";
+  var callLog=[
+    {name:"Rahul Sharma",av:"RS",type:"incoming",time:"Today, 4:30 PM",duration:"12 min",missed:false,video:false},
+    {name:"Mom ❤️",av:"MA",type:"outgoing",time:"Today, 1:15 PM",duration:"8 min",missed:false,video:true},
+    {name:"John Smith",av:"JS",type:"missed",time:"Today, 11:20 AM",duration:"",missed:true,video:false},
+    {name:"Dev Team",av:"DT",type:"incoming",time:"Today, 10:00 AM",duration:"45 min",missed:false,video:true,group:true,members:5},
+    {name:"Priya Singh",av:"PS",type:"outgoing",time:"Yesterday, 9:45 PM",duration:"23 min",missed:false,video:false},
+    {name:"Amit Patel",av:"AP",type:"outgoing",time:"Yesterday, 6:00 PM",duration:"5 min",missed:false,video:false},
+    {name:"Project Sync",av:"PS",type:"incoming",time:"Yesterday, 3:00 PM",duration:"32 min",missed:false,video:true,group:true,members:8},
+    {name:"Carlos García",av:"CG",type:"missed",time:"Mon, 3:30 PM",duration:"",missed:true,video:true},
+  ];
+  var meetings=[
+    {title:"Sprint Planning",host:"Amit Patel",time:"Today, 5:00 PM",duration:"1 hr",members:6,status:"upcoming",color:C.accent},
+    {title:"Client Demo",host:"You",time:"Tomorrow, 11:00 AM",duration:"30 min",members:4,status:"scheduled",color:C.blue},
+    {title:"Design Review",host:"Priya Singh",time:"Tomorrow, 3:00 PM",duration:"45 min",members:5,status:"scheduled",color:"#a855f7"},
+    {title:"Weekly Standup",host:"Rahul Sharma",time:"Wed, 9:30 AM",duration:"15 min",members:10,status:"recurring",color:"#ff9f1a"},
+    {title:"1:1 with Boss",host:"You",time:"Thu, 2:00 PM",duration:"30 min",members:2,status:"scheduled",color:"#06b6d4"},
+  ];
+  var features=[
+    {icon:"👥",name:"Group Call",desc:"Voice call with up to 32 people",color:C.accent,tag:"LIVE"},
+    {icon:"📹",name:"Video Conference",desc:"HD video meeting with screen share",color:C.blue,tag:"HD"},
+    {icon:"🎙️",name:"Audio Room",desc:"Live audio room — Clubhouse style",color:"#a855f7",tag:"LIVE"},
+    {icon:"📺",name:"Screen Share",desc:"Share your screen during calls",color:"#ff9f1a",tag:"PRO"},
+    {icon:"🤖",name:"AI Call Summary",desc:"Auto-generates meeting notes & action items",color:"#06b6d4",tag:"AI"},
+    {icon:"🌐",name:"Live Translate Call",desc:"Real-time voice translation during call",color:"#ff3b5c",tag:"AI"},
+    {icon:"📝",name:"Call Recording",desc:"Record calls with auto-transcription",color:"#2ed573",tag:"PRO"},
+    {icon:"🔇",name:"Noise Cancel",desc:"AI removes background noise",color:"#ff69b4",tag:"AI"},
+    {icon:"📊",name:"Call Analytics",desc:"Track call duration, frequency & patterns",color:C.textDim,tag:"INSIGHT"},
+    {icon:"🛡️",name:"Spam Shield",desc:"AI blocks spam & scam calls",color:"#ff3b5c",tag:"SAFETY"},
+  ];
+  var inIcon=<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2ed573" strokeWidth="3" strokeLinecap="round"><polyline points="17 1 7 11"/><polyline points="7 1 7 11 17 11"/></svg>;
+  var outIcon=<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.blue} strokeWidth="3" strokeLinecap="round"><polyline points="7 23 17 13"/><polyline points="17 23 17 13 7 13"/></svg>;
+  var missIcon=<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ff3b5c" strokeWidth="3" strokeLinecap="round"><polyline points="17 1 7 11"/><polyline points="7 1 7 11 17 11"/></svg>;
+  var phoneIcon=<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>;
+  var vidIcon=<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.blue} strokeWidth="2" strokeLinecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>;
+  var tabs=[{id:"recent",label:"Recent",icon:"📞"},{id:"meetings",label:"Meetings",icon:"📅"},{id:"features",label:"More",icon:"✨"}];
+  return (<div style={{height:"100%",display:"flex",flexDirection:"column",background:C.bg}}>
+    <SBar netMode={netMode}/>
+    <div style={{padding:"8px 20px 6px"}}>
+      <div style={{fontFamily:F,fontWeight:900,fontSize:28,color:C.text}}>Calls</div>
+    </div>
+    {/* Sub Tabs */}
+    <div style={{display:"flex",gap:6,padding:"6px 16px 10px"}}>
+      {tabs.map(function(t){var a=tab===t.id;return (
+        <button key={t.id} onClick={function(){setTab(t.id)}} style={{display:"flex",alignItems:"center",gap:5,padding:"7px 16px",borderRadius:20,border:"none",background:a?"linear-gradient(135deg,"+C.accent+","+C.blue+")":C.card,cursor:"pointer",flexShrink:0}}>
+          <span style={{fontSize:12}}>{t.icon}</span>
+          <span style={{fontFamily:F,fontSize:12,fontWeight:600,color:a?"#fff":C.textDim}}>{t.label}</span>
+        </button>
+      )})}
+    </div>
+    <div style={{flex:1,overflowY:"auto",padding:"0 12px 90px"}}>
+      {/* ─── RECENT TAB ─── */}
+      {tab==="recent"&&(<div>
+        {/* Quick Actions */}
+        <div style={{display:"flex",gap:8,padding:"0 4px 12px"}}>
+          {[{icon:"👥",label:"Group Call",color:C.accent},{icon:"📹",label:"Video Meet",color:C.blue},{icon:"🔗",label:"Join via Link",color:"#a855f7"}].map(function(q,i){return (
+            <div key={i} style={{flex:1,padding:"12px 8px",background:C.card,borderRadius:14,border:"1px solid "+C.border,textAlign:"center",cursor:"pointer"}}>
+              <div style={{fontSize:22,marginBottom:4}}>{q.icon}</div>
+              <div style={{fontFamily:F,fontSize:10,fontWeight:600,color:q.color}}>{q.label}</div>
+            </div>
+          )})}
+        </div>
+        {/* Call Log */}
+        {callLog.map(function(c,i){return (<div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 8px",borderBottom:"1px solid "+C.border,animation:"su 0.2s "+i*0.04+"s both"}}>
+          <div style={{position:"relative"}}>
+            <Av name={c.name} initials={c.av} size={46}/>
+            {c.group&&<div style={{position:"absolute",bottom:-2,right:-2,width:18,height:18,borderRadius:6,background:C.blue,display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:"#fff",border:"2px solid "+C.bg}}>{c.members}</div>}
+          </div>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
+              <span style={{fontFamily:F,fontWeight:600,fontSize:14,color:c.missed?"#ff3b5c":C.text}}>{c.name}</span>
+              {c.group&&<span style={{fontFamily:FM,fontSize:8,color:C.blue,background:C.blueGlow,padding:"1px 5px",borderRadius:4}}>GROUP</span>}
+              {c.video&&<span style={{fontSize:10}}>📹</span>}
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:5,marginTop:3}}>
+              {c.type==="incoming"?inIcon:c.type==="missed"?missIcon:outIcon}
+              <span style={{fontFamily:FM,fontSize:9,color:C.textDim}}>{c.time}</span>
+              {c.duration&&<span style={{fontFamily:FM,fontSize:9,color:C.textMuted}}>· {c.duration}</span>}
+            </div>
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button style={{background:"none",border:"none",cursor:"pointer",padding:4}}>{phoneIcon}</button>
+            <button style={{background:"none",border:"none",cursor:"pointer",padding:4}}>{vidIcon}</button>
+          </div>
+        </div>)})}
+      </div>)}
+      {/* ─── MEETINGS TAB ─── */}
+      {tab==="meetings"&&(<div>
+        {/* Create Meeting Button */}
+        <div style={{padding:"4px 4px 14px",display:"flex",gap:8}}>
+          <button style={{flex:1,padding:"14px",background:"linear-gradient(135deg,"+C.accent+","+C.blue+")",borderRadius:16,border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span style={{fontFamily:F,fontWeight:700,fontSize:14,color:"#fff"}}>New Meeting</span>
+          </button>
+          <button style={{padding:"14px 20px",background:C.card,borderRadius:16,border:"1px solid "+C.border,cursor:"pointer",display:"flex",alignItems:"center",gap:8}}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span style={{fontFamily:F,fontWeight:600,fontSize:13,color:C.text}}>Schedule</span>
+          </button>
+        </div>
+        {/* Meeting List */}
+        {meetings.map(function(m,i){return (<div key={i} style={{padding:"14px 16px",background:C.card,borderRadius:16,marginBottom:8,border:"1px solid "+C.border,borderLeft:"3px solid "+m.color,animation:"su 0.25s "+i*0.06+"s both"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+            <div>
+              <div style={{fontFamily:F,fontWeight:700,fontSize:15,color:C.text}}>{m.title}</div>
+              <div style={{fontFamily:F,fontSize:12,color:C.textDim,marginTop:3}}>Hosted by {m.host}</div>
+            </div>
+            <span style={{fontFamily:FM,fontSize:8,color:m.color,background:m.color+"15",padding:"3px 8px",borderRadius:8,letterSpacing:0.5}}>{m.status.toUpperCase()}</span>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:12,marginTop:10}}>
+            <div style={{display:"flex",alignItems:"center",gap:4}}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.textDim} strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span style={{fontFamily:FM,fontSize:10,color:C.textDim}}>{m.time}</span></div>
+            <div style={{display:"flex",alignItems:"center",gap:4}}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={C.textDim} strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span style={{fontFamily:FM,fontSize:10,color:C.textDim}}>{m.members} members</span></div>
+            <span style={{fontFamily:FM,fontSize:10,color:C.textMuted}}>{m.duration}</span>
+          </div>
+          {m.status==="upcoming"&&<button style={{marginTop:10,width:"100%",padding:"10px",borderRadius:12,background:"linear-gradient(135deg,"+m.color+","+C.blue+")",border:"none",fontFamily:F,fontWeight:700,fontSize:13,color:"#fff",cursor:"pointer"}}>Join Now</button>}
+        </div>)})}
+      </div>)}
+      {/* ─── MORE FEATURES TAB ─── */}
+      {tab==="features"&&(<div>
+        <div style={{padding:"4px 0 14px"}}>
+          <div style={{padding:18,borderRadius:18,background:"linear-gradient(135deg,rgba(59,130,246,0.1),rgba(0,229,160,0.08))",border:"1px solid rgba(59,130,246,0.12)",textAlign:"center"}}>
+            <div style={{fontSize:36,marginBottom:6}}>🚀</div>
+            <div style={{fontFamily:F,fontWeight:800,fontSize:18,color:C.text}}>Next-Gen Calling</div>
+            <div style={{fontFamily:F,fontSize:12,color:C.textDim,marginTop:4}}>AI-powered features that no other app offers</div>
+          </div>
+        </div>
+        {features.map(function(f,i){return (<div key={i} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 16px",background:C.card,borderRadius:16,marginBottom:8,border:"1px solid "+C.border,cursor:"pointer",animation:"su 0.25s "+i*0.04+"s both"}}>
+          <div style={{width:48,height:48,borderRadius:14,background:f.color+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{f.icon}</div>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
+              <span style={{fontFamily:F,fontWeight:700,fontSize:14,color:C.text}}>{f.name}</span>
+              <span style={{fontFamily:FM,fontSize:8,color:f.color,background:f.color+"15",padding:"2px 6px",borderRadius:6}}>{f.tag}</span>
+            </div>
+            <div style={{fontFamily:F,fontSize:12,color:C.textDim,marginTop:2}}>{f.desc}</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>)})}
+      </div>)}
+    </div>
+    <button style={{position:"absolute",bottom:80,right:20,width:56,height:56,borderRadius:18,background:"linear-gradient(135deg,"+C.accent+","+C.blue+")",border:"none",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 24px "+C.accentGlow,color:"#fff"}}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/><line x1="12" y1="6" x2="12" y2="12"/><line x1="9" y1="9" x2="15" y2="9"/></svg></button>
+    <BNav active="calls" onNav={onNav}/>
+  </div>);
+}
+
+// ══════ ENTERTAINMENT TAB — GEN Z VIBES ══════
+function EntertainmentScreen({netMode,onNav}){
+  var[tab,setTab]=useState("foryou");
+  var[likedItems,setLikedItems]=useState({});
+  function toggleLike(id){setLikedItems(function(p){var n={};Object.assign(n,p);n[id]=!p[id];return n})}
+
+  var tabs=[{id:"foryou",label:"For You",icon:"🔥"},{id:"reels",label:"Reels",icon:"🎬"},{id:"live",label:"Live",icon:"🔴"},{id:"vibe",label:"Vibe",icon:"✨"}];
+
+  // Trending Reels / Short content
+  var reels=[
+    {id:"r1",user:"@viralking",caption:"Bhai ne kar dikhaya 🔥 #impossible #viral",likes:"2.4M",comments:"45K",shares:"12K",sound:"Trending Beat",verified:true,category:"comedy"},
+    {id:"r2",user:"@techbro.in",caption:"iPhone 16 vs Nothing Phone — honest review 📱",likes:"890K",comments:"23K",shares:"8K",sound:"Original Audio",verified:true,category:"tech"},
+    {id:"r3",user:"@fitnessguru",caption:"30 days transformation — no gym needed 💪",likes:"1.8M",comments:"67K",shares:"34K",sound:"Motivational Beat",verified:false,category:"fitness"},
+    {id:"r4",user:"@foodie.delhi",caption:"Best momos in Delhi — ₹20 mein plate 🥟",likes:"567K",comments:"12K",shares:"9K",sound:"Foodie Anthem",verified:false,category:"food"},
+    {id:"r5",user:"@comedyking",caption:"School teacher vs student 😂 part 47",likes:"4.1M",comments:"89K",shares:"56K",sound:"Comedy Dhol",verified:true,category:"comedy"},
+    {id:"r6",user:"@cryptobaba",caption:"₹100 to ₹1 Lakh — real story no cap 📈",likes:"1.2M",comments:"34K",shares:"22K",sound:"Money Rain",verified:false,category:"finance"},
+  ];
+
+  // Live streams
+  var liveStreams=[
+    {id:"l1",user:"@gaborone.live",title:"Live Gaming — BGMI Tournament 🎮",viewers:"12.4K",category:"Gaming",thumb:"🎮",hot:true},
+    {id:"l2",user:"@musicjam",title:"Unplugged Session — Bollywood Hits 🎸",viewers:"8.2K",category:"Music",thumb:"🎸",hot:true},
+    {id:"l3",user:"@studywithme",title:"12 Hour Study Stream — UPSC 📚",viewers:"5.6K",category:"Education",thumb:"📚",hot:false},
+    {id:"l4",user:"@cooklive",title:"Making Butter Chicken from scratch 🍗",viewers:"3.1K",category:"Cooking",thumb:"🍳",hot:false},
+    {id:"l5",user:"@astro.talks",title:"What's your zodiac saying today? ♈",viewers:"9.8K",category:"Lifestyle",thumb:"🔮",hot:true},
+    {id:"l6",user:"@debate.club",title:"AI will replace jobs — For vs Against 🤖",viewers:"7.3K",category:"Discussion",thumb:"💬",hot:true},
+  ];
+
+  // Vibe Zone — interactive social features
+  var vibes=[
+    {id:"v1",icon:"🎭",name:"Anonymous Confessions",desc:"Confess anything — 100% anonymous. No one knows who you are",color:"#a855f7",tag:"ANONYMOUS",users:"24K active"},
+    {id:"v2",icon:"🔥",name:"Hot Takes",desc:"Drop your controversial opinion — let people agree or disagree",color:"#ff3b5c",tag:"TRENDING",users:"18K active"},
+    {id:"v3",icon:"🎯",name:"Daily Challenge",desc:"Today: Send a voice note in a language you don't speak",color:C.accent,tag:"NEW DAILY",users:"31K active"},
+    {id:"v4",icon:"💬",name:"Debate Arena",desc:"Pick a side. Argue your point. Win the crowd",color:C.blue,tag:"LIVE",users:"9K active"},
+    {id:"v5",icon:"🎲",name:"Truth or Dare",desc:"Play with friends or strangers — spicy mode available 🌶️",color:"#ff9f1a",tag:"PARTY",users:"15K active"},
+    {id:"v6",icon:"🔮",name:"Vibe Match",desc:"Answer 10 questions — find people with same energy",color:"#ff69b4",tag:"SOCIAL",users:"22K active"},
+    {id:"v7",icon:"📊",name:"This or That",desc:"Quick polls — Pizza or Biryani? Money or Fame?",color:"#06b6d4",tag:"POLLS",users:"40K active"},
+    {id:"v8",icon:"🏆",name:"Weekly Leaderboard",desc:"Top creators, top vibers, top debaters — compete & win",color:"#ff9f1a",tag:"COMPETE",users:"50K active"},
+    {id:"v9",icon:"🎤",name:"Open Mic Night",desc:"Sing, rap, do standup — live audience rates you",color:"#2ed573",tag:"LIVE",users:"6K active"},
+    {id:"v10",icon:"💀",name:"Roast Battle",desc:"Challenge a friend to a roast. Audience picks the winner",color:"#ff3b5c",tag:"18+",users:"11K active"},
+  ];
+
+  var heartIcon=function(filled){return <svg width="18" height="18" viewBox="0 0 24 24" fill={filled?"#ff3b5c":"none"} stroke={filled?"#ff3b5c":C.textMuted} strokeWidth="2" strokeLinecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>};
+
+  return (<div style={{height:"100%",display:"flex",flexDirection:"column",background:C.bg}}>
+    <SBar netMode={netMode}/>
+    <div style={{padding:"8px 20px 4px"}}>
+      <div style={{fontFamily:F,fontWeight:900,fontSize:28,color:C.text}}>Explore</div>
+    </div>
+    {/* Tabs */}
+    <div style={{display:"flex",gap:6,padding:"6px 16px 10px"}}>
+      {tabs.map(function(t){var a=tab===t.id;return (
+        <button key={t.id} onClick={function(){setTab(t.id)}} style={{display:"flex",alignItems:"center",gap:5,padding:"7px 16px",borderRadius:20,border:"none",background:a?"linear-gradient(135deg,"+C.accent+","+C.blue+")":C.card,cursor:"pointer",flexShrink:0}}>
+          <span style={{fontSize:12}}>{t.icon}</span>
+          <span style={{fontFamily:F,fontSize:12,fontWeight:600,color:a?"#fff":C.textDim}}>{t.label}</span>
+        </button>
+      )})}
+    </div>
+    <div style={{flex:1,overflowY:"auto",padding:"0 12px 90px"}}>
+
+      {/* ─── FOR YOU ─── */}
+      {tab==="foryou"&&(<div>
+        {/* Featured Banner */}
+        <div style={{padding:20,borderRadius:20,background:"linear-gradient(135deg,#ff3b5c22,#a855f722)",border:"1px solid rgba(255,59,92,0.15)",marginBottom:14,position:"relative",overflow:"hidden"}}>
+          <div style={{fontFamily:FM,fontSize:9,color:"#ff3b5c",letterSpacing:2,marginBottom:6}}>🔥 TRENDING NOW</div>
+          <div style={{fontFamily:F,fontWeight:800,fontSize:18,color:C.text}}>RELAY Roast Battle Season 2</div>
+          <div style={{fontFamily:F,fontSize:12,color:C.textDim,marginTop:4}}>Challenge anyone to a roast — 50K watching live</div>
+          <button style={{marginTop:12,padding:"8px 20px",borderRadius:12,background:"#ff3b5c",border:"none",fontFamily:F,fontWeight:700,fontSize:12,color:"#fff",cursor:"pointer"}}>Watch Now</button>
+        </div>
+        {/* Quick Categories */}
+        <div style={{display:"flex",gap:8,marginBottom:14,overflowX:"auto",padding:"0 2px"}}>
+          {["🔥 Trending","😂 Comedy","📱 Tech","🍕 Food","💪 Fitness","📈 Finance","🎮 Gaming","🎵 Music"].map(function(c,i){return (
+            <button key={i} style={{padding:"6px 14px",borderRadius:16,background:C.card,border:"1px solid "+C.border,fontFamily:F,fontSize:11,color:C.textDim,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{c}</button>
+          )})}
+        </div>
+        {/* Reels Feed */}
+        {reels.map(function(r,i){var liked=likedItems[r.id];return (<div key={r.id} style={{background:C.card,borderRadius:18,marginBottom:10,border:"1px solid "+C.border,overflow:"hidden",animation:"su 0.25s "+i*0.05+"s both"}}>
+          {/* Reel Preview */}
+          <div style={{height:180,background:"linear-gradient(135deg,"+C.bg+",#1a1a2e)",display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
+            <div style={{fontSize:56,opacity:0.3}}>▶</div>
+            <div style={{position:"absolute",top:10,left:12,display:"flex",alignItems:"center",gap:6}}>
+              <div style={{width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,"+C.accent+","+C.blue+")",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:F,fontWeight:700,fontSize:10,color:"#fff"}}>{r.user[1].toUpperCase()}</div>
+              <span style={{fontFamily:F,fontWeight:600,fontSize:12,color:"#fff"}}>{r.user}</span>
+              {r.verified&&<span style={{fontSize:10}}>✅</span>}
+            </div>
+            <div style={{position:"absolute",bottom:10,left:12,right:50}}>
+              <div style={{fontFamily:F,fontSize:12,color:"#fff",textShadow:"0 1px 4px rgba(0,0,0,0.8)"}}>{r.caption}</div>
+              <div style={{fontFamily:FM,fontSize:9,color:"rgba(255,255,255,0.6)",marginTop:4}}>🎵 {r.sound}</div>
+            </div>
+            {/* Side Actions */}
+            <div style={{position:"absolute",right:10,bottom:10,display:"flex",flexDirection:"column",alignItems:"center",gap:12}}>
+              <div onClick={function(){toggleLike(r.id)}} style={{textAlign:"center",cursor:"pointer"}}>{heartIcon(liked)}<div style={{fontFamily:FM,fontSize:9,color:liked?"#ff3b5c":C.textMuted,marginTop:2}}>{r.likes}</div></div>
+              <div style={{textAlign:"center"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2" strokeLinecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><div style={{fontFamily:FM,fontSize:9,color:C.textMuted,marginTop:2}}>{r.comments}</div></div>
+              <div style={{textAlign:"center"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2" strokeLinecap="round"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 014-4h12"/></svg><div style={{fontFamily:FM,fontSize:9,color:C.textMuted,marginTop:2}}>{r.shares}</div></div>
+            </div>
+          </div>
+        </div>)})}
+      </div>)}
+
+      {/* ─── REELS ─── */}
+      {tab==="reels"&&(<div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+          {reels.concat(reels).map(function(r,i){var liked=likedItems["rg"+i];return (<div key={i} style={{borderRadius:16,overflow:"hidden",background:C.card,border:"1px solid "+C.border,cursor:"pointer",animation:"su 0.2s "+i*0.04+"s both"}}>
+            <div style={{height:200,background:"linear-gradient(135deg,"+(i%3===0?"#1a0a2e":"#0a1a2e")+","+(i%2===0?"#2a0a1e":"#0a2a1e")+")",display:"flex",alignItems:"center",justifyContent:"center",position:"relative"}}>
+              <div style={{fontSize:40,opacity:0.2}}>▶</div>
+              <div style={{position:"absolute",bottom:8,left:8,right:8}}>
+                <div style={{fontFamily:F,fontWeight:600,fontSize:11,color:"#fff",textShadow:"0 1px 3px rgba(0,0,0,0.8)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.caption.slice(0,35)}</div>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:4}}>
+                  <span style={{fontFamily:FM,fontSize:9,color:"rgba(255,255,255,0.5)"}}>{r.user}</span>
+                  <div style={{display:"flex",alignItems:"center",gap:2}}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="#ff3b5c" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                    <span style={{fontFamily:FM,fontSize:9,color:"rgba(255,255,255,0.5)"}}>{r.likes}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>)})}
+        </div>
+      </div>)}
+
+      {/* ─── LIVE ─── */}
+      {tab==="live"&&(<div>
+        <div style={{display:"flex",gap:8,marginBottom:14,overflowX:"auto"}}>
+          {["🔴 All","🎮 Gaming","🎵 Music","📚 Study","🍳 Cooking","💬 Talk","🔮 Astro"].map(function(c,i){return (
+            <button key={i} style={{padding:"6px 14px",borderRadius:16,background:i===0?C.accent:C.card,border:"1px solid "+(i===0?C.accent:C.border),fontFamily:F,fontSize:11,color:i===0?"#000":C.textDim,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0,fontWeight:i===0?700:400}}>{c}</button>
+          )})}
+        </div>
+        {liveStreams.map(function(l,i){return (<div key={l.id} style={{display:"flex",gap:14,padding:"14px",background:C.card,borderRadius:16,marginBottom:8,border:"1px solid "+C.border,cursor:"pointer",animation:"su 0.25s "+i*0.05+"s both"}}>
+          <div style={{width:70,height:70,borderRadius:16,background:"linear-gradient(135deg,#1a1a2e,#2a0a2e)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:32,position:"relative",flexShrink:0}}>
+            {l.thumb}
+            {l.hot&&<div style={{position:"absolute",top:-4,right:-4,background:"#ff3b5c",borderRadius:6,padding:"2px 5px",fontFamily:FM,fontSize:8,color:"#fff",fontWeight:700}}>LIVE</div>}
+          </div>
+          <div style={{flex:1}}>
+            <div style={{fontFamily:F,fontWeight:700,fontSize:14,color:C.text}}>{l.title}</div>
+            <div style={{fontFamily:F,fontSize:11,color:C.textDim,marginTop:3}}>{l.user}</div>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}>
+              <div style={{display:"flex",alignItems:"center",gap:3}}><div style={{width:6,height:6,borderRadius:"50%",background:"#ff3b5c",animation:"pulse 1.5s infinite"}}/><span style={{fontFamily:FM,fontSize:10,color:"#ff3b5c"}}>{l.viewers}</span></div>
+              <span style={{fontFamily:FM,fontSize:9,color:C.textMuted,background:C.bg,padding:"2px 6px",borderRadius:6}}>{l.category}</span>
+            </div>
+          </div>
+          <button style={{padding:"8px 14px",borderRadius:12,background:"rgba(255,59,92,0.1)",border:"1px solid rgba(255,59,92,0.2)",fontFamily:F,fontSize:11,fontWeight:600,color:"#ff3b5c",cursor:"pointer",alignSelf:"center"}}>Join</button>
+        </div>)})}
+      </div>)}
+
+      {/* ─── VIBE ZONE ─── */}
+      {tab==="vibe"&&(<div>
+        <div style={{padding:18,borderRadius:18,background:"linear-gradient(135deg,rgba(168,85,247,0.12),rgba(255,105,180,0.08))",border:"1px solid rgba(168,85,247,0.15)",marginBottom:14,textAlign:"center"}}>
+          <div style={{fontSize:36,marginBottom:6}}>✨</div>
+          <div style={{fontFamily:F,fontWeight:800,fontSize:18,color:C.text}}>Vibe Zone</div>
+          <div style={{fontFamily:F,fontSize:12,color:C.textDim,marginTop:4}}>Social experiences that hit different</div>
+        </div>
+        {vibes.map(function(v,i){return (<div key={v.id} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 16px",background:C.card,borderRadius:16,marginBottom:8,border:"1px solid "+C.border,cursor:"pointer",animation:"su 0.25s "+i*0.04+"s both"}}>
+          <div style={{width:50,height:50,borderRadius:16,background:v.color+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:26,flexShrink:0}}>{v.icon}</div>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:6}}>
+              <span style={{fontFamily:F,fontWeight:700,fontSize:14,color:C.text}}>{v.name}</span>
+              <span style={{fontFamily:FM,fontSize:8,color:v.color,background:v.color+"15",padding:"2px 6px",borderRadius:6}}>{v.tag}</span>
+            </div>
+            <div style={{fontFamily:F,fontSize:11,color:C.textDim,marginTop:2,lineHeight:1.4}}>{v.desc}</div>
+            <div style={{fontFamily:FM,fontSize:9,color:C.textMuted,marginTop:4}}>{v.users}</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>)})}
+      </div>)}
+    </div>
+    <BNav active="entertainment" onNav={onNav}/>
   </div>);
 }
 
@@ -743,43 +1059,214 @@ function Vault({netMode,onBack}){
   </div>);
 }
 
-// ══════ SUPERTOOLS HUB ══════
+// ══════ SUPERTOOLS HUB — FUTURISTIC ══════
 function SuperTools({netMode,onBack,onOpen}){
-  var tools=[
-    {key:"sos",name:"SOS Emergency",desc:"One-tap GPS + SOS to emergency contacts via SMS",color:"#ff3b5c",icon:"🆘",tag:"LIFE-SAVING"},
-    {key:"walkie",name:"Walkie-Talkie",desc:"Push-to-talk on cellular — zero internet, zero charges",color:"#ff9f1a",icon:"🎙️",tag:"UNIQUE"},
+  var[tab,setTab]=useState("power");
+  var powerTools=[
+    {key:"sos",name:"SOS Emergency",desc:"One-tap GPS + SOS broadcast to emergency contacts",color:"#ff3b5c",icon:"🆘",tag:"LIFE-SAVING"},
+    {key:"walkie",name:"Walkie-Talkie",desc:"Push-to-talk on cellular — zero internet needed",color:"#ff9f1a",icon:"🎙️",tag:"UNIQUE"},
     {key:"vault",name:"Vault Chat",desc:"Hidden encrypted chats with decoy PIN",color:"#a855f7",icon:"🔐",tag:"PRIVACY"},
-    {key:"pay",name:"SMS Pay",desc:"Send/receive money via SMS — no internet needed",color:C.accent,icon:"💸",tag:"FINTECH"},
-    {key:"mesh",name:"Mesh Relay",desc:"Phone-to-phone via Bluetooth when cellular is down",color:C.blue,icon:"📡",tag:"OFFLINE"},
-    {key:"alert",name:"Mass Alert",desc:"Broadcast alerts to thousands via SMS",color:"#ff3b5c",icon:"📢",tag:"BROADCAST"}
+    {key:"pay",name:"SMS Pay",desc:"Send money via SMS — UPI without internet",color:C.accent,icon:"💸",tag:"FINTECH"},
+    {key:"mesh",name:"Mesh Relay",desc:"Bluetooth phone-to-phone when cellular is down",color:C.blue,icon:"📡",tag:"OFFLINE"},
+    {key:"alert",name:"Mass Alert",desc:"Broadcast to thousands via SMS instantly",color:"#ff3b5c",icon:"📢",tag:"BROADCAST"},
   ];
+  var aiTools=[
+    {icon:"🤖",name:"AI Chat Assistant",desc:"Built-in AI — ask anything, get instant answers",color:C.accent,tag:"AI"},
+    {icon:"🌐",name:"Live Translate Call",desc:"Real-time voice translation during live calls",color:C.blue,tag:"AI"},
+    {icon:"📝",name:"Smart Reply",desc:"AI suggests contextual replies in any language",color:"#a855f7",tag:"AI"},
+    {icon:"📊",name:"Chat Analytics",desc:"Insights on your messaging patterns & habits",color:"#ff9f1a",tag:"INSIGHT"},
+    {icon:"🔍",name:"Smart Search",desc:"Search across all chats, media, links instantly",color:"#06b6d4",tag:"SEARCH"},
+    {icon:"📸",name:"AI Image Edit",desc:"Edit, enhance, remove bg from chat photos",color:"#ff69b4",tag:"AI"},
+  ];
+  var privacyTools=[
+    {icon:"🛡️",name:"Privacy Shield",desc:"Block screenshots, screen recording in chats",color:"#ff3b5c",tag:"PRIVACY"},
+    {icon:"⏰",name:"Disappearing Messages",desc:"Auto-delete messages after set time",color:C.accent,tag:"PRIVACY"},
+    {icon:"👻",name:"Ghost Mode",desc:"Go invisible — no one sees you online",color:"#a855f7",tag:"STEALTH"},
+    {icon:"🔒",name:"App Lock",desc:"Fingerprint/Face ID to open RELAY",color:C.blue,tag:"SECURITY"},
+    {icon:"🚫",name:"Anti-Spam AI",desc:"AI blocks spam, scam & phishing messages",color:"#ff9f1a",tag:"AI"},
+    {icon:"📍",name:"Fake Location",desc:"Share a fake location instead of real one",color:"#2ed573",tag:"PRIVACY"},
+  ];
+  var tabs=[{id:"power",label:"Power",icon:"⚡"},{id:"ai",label:"AI Tools",icon:"🤖"},{id:"privacy",label:"Privacy",icon:"🛡️"}];
   return (<div style={{height:"100%",display:"flex",flexDirection:"column",background:C.bg}}>
     <SBar netMode={netMode}/>
-    <div style={{padding:"10px 20px 6px"}}>
-      <div style={{fontFamily:F,fontWeight:900,fontSize:24,color:C.text}}>SuperTools</div>
-      <div style={{fontFamily:F,fontSize:13,color:C.textDim,marginTop:4}}>Features no other app has — all work <span style={{color:C.accent}}>without internet</span></div>
+    <div style={{padding:"8px 20px 4px"}}>
+      <div style={{fontFamily:F,fontWeight:900,fontSize:28,color:C.text}}>Tools</div>
     </div>
-    <div style={{margin:"12px 16px",padding:"14px 18px",borderRadius:16,background:"linear-gradient(135deg,"+C.accentGlow+","+C.blueGlow+")",border:"1px solid rgba(0,229,160,0.15)",display:"flex",alignItems:"center",gap:14}}>
-      <div style={{fontSize:28}}>💡</div>
-      <div>
-        <div style={{fontFamily:F,fontWeight:700,fontSize:13,color:C.accent}}>WhatsApp needs WiFi/Data</div>
-        <div style={{fontFamily:F,fontSize:11,color:C.textDim,marginTop:2}}>RELAY works on just ₹0 cellular signal</div>
-      </div>
+    <div style={{display:"flex",gap:6,padding:"6px 16px 10px"}}>
+      {tabs.map(function(t){var a=tab===t.id;return (
+        <button key={t.id} onClick={function(){setTab(t.id)}} style={{display:"flex",alignItems:"center",gap:5,padding:"7px 16px",borderRadius:20,border:"none",background:a?"linear-gradient(135deg,"+C.accent+","+C.blue+")":C.card,cursor:"pointer",flexShrink:0}}>
+          <span style={{fontSize:12}}>{t.icon}</span>
+          <span style={{fontFamily:F,fontSize:12,fontWeight:600,color:a?"#fff":C.textDim}}>{t.label}</span>
+        </button>
+      )})}
+      <button onClick={function(){onBack("settings")}} style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:4,padding:"7px 14px",borderRadius:20,background:C.card,border:"1px solid "+C.border,cursor:"pointer"}}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.textDim} strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span style={{fontFamily:F,fontSize:11,color:C.textDim}}>Settings</span>
+      </button>
     </div>
-    <div style={{flex:1,overflowY:"auto",padding:"6px 16px 90px"}}>
-      {tools.map(function(t,i){return (<div key={t.key} onClick={function(){onOpen(t.key)}} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 16px",background:C.card,borderRadius:16,marginBottom:8,border:"1px solid "+C.border,cursor:"pointer",animation:"su 0.3s "+i*0.05+"s both"}}>
-        <div style={{width:48,height:48,borderRadius:14,background:"rgba("+{sos:"255,59,92",walkie:"255,159,26",vault:"168,85,247",pay:"0,229,160",mesh:"59,130,246",alert:"255,59,92"}[t.key]+",0.12)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{t.icon}</div>
-        <div style={{flex:1}}>
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <span style={{fontFamily:F,fontWeight:700,fontSize:14,color:C.text}}>{t.name}</span>
-            <span style={{fontFamily:FM,fontSize:8,letterSpacing:1.5,color:t.color,background:"rgba("+{sos:"255,59,92",walkie:"255,159,26",vault:"168,85,247",pay:"0,229,160",mesh:"59,130,246",alert:"255,59,92"}[t.key]+",0.12)",padding:"2px 7px",borderRadius:6}}>{t.tag}</span>
-          </div>
-          <div style={{fontFamily:F,fontSize:12,color:C.textDim,marginTop:3,lineHeight:1.4}}>{t.desc}</div>
+    <div style={{flex:1,overflowY:"auto",padding:"0 16px 90px"}}>
+      {tab==="power"&&(<div>
+        <div style={{padding:16,borderRadius:16,background:"linear-gradient(135deg,"+C.accentGlow+","+C.blueGlow+")",border:"1px solid rgba(0,229,160,0.15)",marginBottom:12,display:"flex",alignItems:"center",gap:12}}>
+          <span style={{fontSize:24}}>💡</span>
+          <div><div style={{fontFamily:F,fontWeight:700,fontSize:13,color:C.accent}}>Works without internet</div><div style={{fontFamily:F,fontSize:11,color:C.textDim,marginTop:2}}>All power tools run on cellular signal</div></div>
         </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        {powerTools.map(function(t,i){return (<div key={t.key} onClick={function(){onOpen(t.key)}} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 16px",background:C.card,borderRadius:16,marginBottom:8,border:"1px solid "+C.border,cursor:"pointer",animation:"su 0.2s "+i*0.04+"s both"}}>
+          <div style={{width:48,height:48,borderRadius:14,background:t.color+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{t.icon}</div>
+          <div style={{flex:1}}>
+            <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:F,fontWeight:700,fontSize:14,color:C.text}}>{t.name}</span><span style={{fontFamily:FM,fontSize:8,color:t.color,background:t.color+"15",padding:"2px 6px",borderRadius:6}}>{t.tag}</span></div>
+            <div style={{fontFamily:F,fontSize:12,color:C.textDim,marginTop:2}}>{t.desc}</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>)})}
+      </div>)}
+      {tab==="ai"&&aiTools.map(function(t,i){return (<div key={i} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 16px",background:C.card,borderRadius:16,marginBottom:8,border:"1px solid "+C.border,cursor:"pointer",animation:"su 0.2s "+i*0.04+"s both"}}>
+        <div style={{width:48,height:48,borderRadius:14,background:t.color+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{t.icon}</div>
+        <div style={{flex:1}}>
+          <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:F,fontWeight:700,fontSize:14,color:C.text}}>{t.name}</span><span style={{fontFamily:FM,fontSize:8,color:t.color,background:t.color+"15",padding:"2px 6px",borderRadius:6}}>{t.tag}</span></div>
+          <div style={{fontFamily:F,fontSize:12,color:C.textDim,marginTop:2}}>{t.desc}</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>)})}
+      {tab==="privacy"&&privacyTools.map(function(t,i){return (<div key={i} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 16px",background:C.card,borderRadius:16,marginBottom:8,border:"1px solid "+C.border,cursor:"pointer",animation:"su 0.2s "+i*0.04+"s both"}}>
+        <div style={{width:48,height:48,borderRadius:14,background:t.color+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,flexShrink:0}}>{t.icon}</div>
+        <div style={{flex:1}}>
+          <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:F,fontWeight:700,fontSize:14,color:C.text}}>{t.name}</span><span style={{fontFamily:FM,fontSize:8,color:t.color,background:t.color+"15",padding:"2px 6px",borderRadius:6}}>{t.tag}</span></div>
+          <div style={{fontFamily:F,fontSize:12,color:C.textDim,marginTop:2}}>{t.desc}</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
       </div>)})}
     </div>
     <BNav active="tools" onNav={onBack}/>
+  </div>);
+}
+
+// ══════ CONTACT PROFILE ══════
+function ContactProfile({contact,netMode,locSettings,onToggleLoc,onBack}){
+  var locOn=locSettings[contact.id]||false;
+  return (<div style={{height:"100%",display:"flex",flexDirection:"column",background:C.bg}}>
+    <SBar netMode={netMode}/>
+    <div style={{display:"flex",alignItems:"center",gap:12,padding:"10px 18px"}}><button onClick={onBack} style={{background:"none",border:"none",color:C.accent,cursor:"pointer"}}>{I.back}</button><span style={{fontFamily:F,fontWeight:800,fontSize:20,color:C.text}}>Contact Info</span></div>
+    <div style={{flex:1,overflowY:"auto",padding:"10px 16px 90px"}}>
+      {/* Profile Card */}
+      <div style={{textAlign:"center",padding:28,borderRadius:20,background:"linear-gradient(135deg,"+C.card+","+C.surface+")",border:"1px solid "+C.border,marginBottom:16}}>
+        <Av name={contact.name} initials={contact.av} size={80} online={contact.online}/>
+        <div style={{fontFamily:F,fontWeight:800,fontSize:22,color:C.text,marginTop:14}}>{contact.name}</div>
+        <div style={{fontFamily:F,fontSize:13,color:C.textDim,marginTop:4}}>{contact.online?"Online now":"Last seen recently"}</div>
+        <div style={{fontFamily:FM,fontSize:12,color:C.textMuted,marginTop:6}}>+91 98765 {String(43210+contact.id).slice(0,5)}</div>
+        <div style={{fontFamily:F,fontSize:12,color:C.textDim,marginTop:8,fontStyle:"italic"}}>"Living life one chat at a time ✌️"</div>
+        {/* Action Buttons */}
+        <div style={{display:"flex",justifyContent:"center",gap:16,marginTop:18}}>
+          {[{icon:"📞",label:"Call"},{icon:"📹",label:"Video"},{icon:"🔍",label:"Search"},{icon:"🔇",label:"Mute"}].map(function(a,i){return (
+            <div key={i} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,cursor:"pointer"}}>
+              <div style={{width:44,height:44,borderRadius:14,background:C.card,border:"1px solid "+C.border,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>{a.icon}</div>
+              <span style={{fontFamily:FM,fontSize:9,color:C.textDim}}>{a.label}</span>
+            </div>
+          )})}
+        </div>
+      </div>
+      {/* Info Sections */}
+      <div style={{background:C.card,borderRadius:16,padding:16,marginBottom:12,border:"1px solid "+C.border}}>
+        <div style={{fontFamily:FM,fontSize:10,color:C.accent,letterSpacing:2,marginBottom:12}}>INFO</div>
+        {[{label:"Phone",value:"+91 98765 "+String(43210+contact.id).slice(0,5)},
+          {label:"Language",value:GL(contact.lang).name+" "+GL(contact.lang).flag},
+          {label:"Region",value:contact.region==="in"?"India 🇮🇳":"International 🌍"},
+          {label:"Added",value:"Jan 15, 2025"},
+        ].map(function(info,i){return (<div key={i} style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderBottom:i<3?"1px solid "+C.border:"none"}}>
+          <span style={{fontFamily:F,fontSize:13,color:C.textDim}}>{info.label}</span>
+          <span style={{fontFamily:F,fontSize:13,color:C.text,fontWeight:500}}>{info.value}</span>
+        </div>)})}
+      </div>
+      {/* Live Location Section */}
+      <div style={{background:C.card,borderRadius:16,padding:16,marginBottom:12,border:"1px solid "+(locOn?"rgba(0,229,160,0.25)":C.border)}}>
+        <div style={{fontFamily:FM,fontSize:10,color:"#ff9f1a",letterSpacing:2,marginBottom:12}}>📍 LIVE LOCATION</div>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+          <div>
+            <div style={{fontFamily:F,fontSize:14,fontWeight:600,color:C.text}}>Share my location with {contact.name.split(" ")[0]}</div>
+            <div style={{fontFamily:F,fontSize:11,color:C.textDim,marginTop:3}}>{locOn?"They can see your real-time location":"Only this person will see your location"}</div>
+          </div>
+          <div onClick={function(){onToggleLoc(contact.id)}} style={{width:48,height:26,borderRadius:13,background:locOn?C.accent:C.textMuted,cursor:"pointer",position:"relative",transition:"background 0.3s"}}>
+            <div style={{width:22,height:22,borderRadius:11,background:"#fff",position:"absolute",top:2,left:locOn?24:2,transition:"left 0.3s",boxShadow:"0 2px 4px rgba(0,0,0,0.2)"}}/>
+          </div>
+        </div>
+        {locOn&&<div style={{padding:14,borderRadius:12,background:"linear-gradient(135deg,rgba(0,229,160,0.06),rgba(59,130,246,0.04))",border:"1px solid rgba(0,229,160,0.12)",marginTop:6}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}><div style={{width:8,height:8,borderRadius:"50%",background:C.accent,animation:"pulse 2s infinite"}}/><span style={{fontFamily:FM,fontSize:10,color:C.accent}}>LIVE SHARING</span></div>
+          <div style={{fontFamily:F,fontSize:12,color:C.textDim}}>📍 Sector 62, Noida, UP</div>
+          <div style={{fontFamily:FM,fontSize:10,color:C.textMuted,marginTop:4}}>Updated 2 seconds ago · Only {contact.name.split(" ")[0]} can see</div>
+        </div>}
+        <div style={{fontFamily:F,fontSize:11,color:C.textMuted,marginTop:10,lineHeight:1.5}}>⚠️ Location is shared only with this contact. No one else can see it unless you enable it for them separately.</div>
+      </div>
+      {/* Media & Links */}
+      <div style={{background:C.card,borderRadius:16,padding:16,marginBottom:12,border:"1px solid "+C.border}}>
+        <div style={{fontFamily:FM,fontSize:10,color:C.blue,letterSpacing:2,marginBottom:12}}>SHARED</div>
+        {[{icon:"🖼️",label:"Media",count:"234 photos, 12 videos"},{icon:"🔗",label:"Links",count:"45 links shared"},{icon:"📄",label:"Documents",count:"8 files"}].map(function(s,i){return (<div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 0",borderBottom:i<2?"1px solid "+C.border:"none",cursor:"pointer"}}>
+          <span style={{fontSize:20}}>{s.icon}</span>
+          <div style={{flex:1}}><div style={{fontFamily:F,fontSize:13,color:C.text}}>{s.label}</div><div style={{fontFamily:FM,fontSize:10,color:C.textDim,marginTop:2}}>{s.count}</div></div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>)})}
+      </div>
+      {/* Danger Zone */}
+      <div style={{background:C.card,borderRadius:16,padding:16,border:"1px solid "+C.border}}>
+        {[{icon:"🚫",label:"Block "+contact.name.split(" ")[0],color:"#ff3b5c"},{icon:"🗑️",label:"Delete chat",color:"#ff3b5c"},{icon:"⚠️",label:"Report contact",color:"#ff9f1a"}].map(function(d,i){return (<div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 0",borderBottom:i<2?"1px solid "+C.border:"none",cursor:"pointer"}}>
+          <span style={{fontSize:16}}>{d.icon}</span>
+          <span style={{fontFamily:F,fontSize:14,color:d.color}}>{d.label}</span>
+        </div>)})}
+      </div>
+    </div>
+  </div>);
+}
+
+// ══════ SETTINGS ══════
+function SettingsScreen({netMode,myLang,onChangeLang,onBack}){
+  var cur=GL(myLang);
+  var sections=[
+    {title:"ACCOUNT",items:[
+      {icon:"👤",name:"My Profile",desc:"Edit name, bio, profile photo",color:C.accent},
+      {icon:"🌐",name:"I Speak "+cur.name+" "+cur.flag,desc:"Change your language",color:C.blue,action:"lang"},
+      {icon:"🔑",name:"Two-Factor Auth",desc:"Extra security for your account",color:"#a855f7"},
+      {icon:"📱",name:"Linked Devices",desc:"Manage connected devices",color:"#ff9f1a"},
+    ]},
+    {title:"CHAT",items:[
+      {icon:"💬",name:"Chat Settings",desc:"Wallpaper, font size, enter to send",color:C.accent},
+      {icon:"⏰",name:"Disappearing Messages",desc:"Default timer for new chats",color:C.blue},
+      {icon:"💾",name:"Storage & Data",desc:"Manage storage usage",color:"#06b6d4"},
+      {icon:"📥",name:"Chat Backup",desc:"Backup chats to cloud",color:"#2ed573"},
+    ]},
+    {title:"PRIVACY",items:[
+      {icon:"🔒",name:"Privacy",desc:"Last seen, profile photo, about",color:"#a855f7"},
+      {icon:"🛡️",name:"App Lock",desc:"Fingerprint / Face ID / PIN",color:"#ff3b5c"},
+      {icon:"🚫",name:"Blocked Contacts",desc:"Manage blocked list",color:"#ff3b5c"},
+      {icon:"📍",name:"Location Settings",desc:"Manage who sees your location",color:"#ff9f1a"},
+    ]},
+    {title:"NOTIFICATIONS",items:[
+      {icon:"🔔",name:"Notifications",desc:"Sound, vibration, popup",color:C.accent},
+      {icon:"🌙",name:"Do Not Disturb",desc:"Schedule quiet hours",color:C.blue},
+    ]},
+    {title:"ABOUT",items:[
+      {icon:"ℹ️",name:"About RELAY",desc:"Version 1.0.0 · Made in India 🇮🇳",color:C.textDim},
+      {icon:"⭐",name:"Rate Us",desc:"Love RELAY? Rate 5 stars!",color:"#ff9f1a"},
+      {icon:"🐛",name:"Report a Bug",desc:"Help us improve",color:"#ff3b5c"},
+      {icon:"📜",name:"Terms & Privacy",desc:"Legal information",color:C.textMuted},
+    ]},
+  ];
+  return (<div style={{height:"100%",display:"flex",flexDirection:"column",background:C.bg}}>
+    <SBar netMode={netMode}/>
+    <div style={{display:"flex",alignItems:"center",gap:12,padding:"10px 18px"}}><button onClick={function(){onBack("tools")}} style={{background:"none",border:"none",color:C.accent,cursor:"pointer"}}>{I.back}</button><span style={{fontFamily:F,fontWeight:800,fontSize:22,color:C.text}}>Settings</span></div>
+    <div style={{flex:1,overflowY:"auto",padding:"6px 16px 30px"}}>
+      {sections.map(function(sec,si){return (<div key={si} style={{marginBottom:16}}>
+        <div style={{fontFamily:FM,fontSize:9,color:C.textMuted,letterSpacing:2,padding:"8px 4px"}}>{sec.title}</div>
+        <div style={{background:C.card,borderRadius:16,border:"1px solid "+C.border,overflow:"hidden"}}>
+          {sec.items.map(function(item,i){return (<div key={i} onClick={item.action==="lang"?function(){onBack("translate")}:undefined} style={{display:"flex",alignItems:"center",gap:12,padding:"13px 14px",borderBottom:i<sec.items.length-1?"1px solid "+C.border:"none",cursor:"pointer"}}>
+            <div style={{width:34,height:34,borderRadius:10,background:item.color+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>{item.icon}</div>
+            <div style={{flex:1}}>
+              <div style={{fontFamily:F,fontSize:14,fontWeight:500,color:C.text}}>{item.name}</div>
+              <div style={{fontFamily:F,fontSize:11,color:C.textDim,marginTop:1}}>{item.desc}</div>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.textMuted} strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>)})}
+        </div>
+      </div>)})}
+      <div style={{textAlign:"center",padding:"20px 0"}}><div style={{fontFamily:F,fontWeight:800,fontSize:18,letterSpacing:4,color:C.textMuted}}>RELAY</div><div style={{fontFamily:FM,fontSize:10,color:C.textMuted,marginTop:4}}>v1.0.0 · Made with ❤️ in India</div></div>
+    </div>
   </div>);
 }
 
@@ -809,32 +1296,32 @@ function RelayApp(){
   var[myLang,setMyLang]=useState("hi");
   var[translateSettings,setTranslateSettings]=useState({});
   var setTranslate=function(cid,settings){setTranslateSettings(function(prev){var n={};Object.keys(prev).forEach(function(k){n[k]=prev[k]});n[cid]=settings;return n})};
+  var[locSettings,setLocSettings]=useState({});
+  var toggleLoc=function(cid){setLocSettings(function(prev){var n={};Object.keys(prev).forEach(function(k){n[k]=prev[k]});n[cid]=!prev[cid];return n})};
   var[netMode,setNetMode]=useState("online");
   var[modeToast,setModeToast]=useState("");
-  // Auto-detect connectivity every 5 seconds
   useEffect(function(){
-    function check(){
-      var online=navigator.onLine;
-      setNetMode(function(prev){
-        if(prev==="online"&&!online){setModeToast("📡 Switched to Cellular Mode — India only");setTimeout(function(){setModeToast("")},3000);return "offline"}
-        if(prev==="offline"&&online){setModeToast("🌐 Back Online — Global access restored");setTimeout(function(){setModeToast("")},3000);return "online"}
-        return prev;
-      });
-    }
-    check();
-    var i=setInterval(check,5000);
-    window.addEventListener("online",function(){setNetMode("online");setModeToast("🌐 Back Online — Global access restored");setTimeout(function(){setModeToast("")},3000)});
-    window.addEventListener("offline",function(){setNetMode("offline");setModeToast("📡 Switched to Cellular Mode — India only");setTimeout(function(){setModeToast("")},3000)});
+    function check(){var online=navigator.onLine;setNetMode(function(prev){
+      if(prev==="online"&&!online){setModeToast("📡 Switched to Cellular Mode");setTimeout(function(){setModeToast("")},3000);return "offline"}
+      if(prev==="offline"&&online){setModeToast("🌐 Back Online");setTimeout(function(){setModeToast("")},3000);return "online"}
+      return prev;
+    })}
+    check();var i=setInterval(check,5000);
+    window.addEventListener("online",function(){setNetMode("online");setModeToast("🌐 Back Online");setTimeout(function(){setModeToast("")},3000)});
+    window.addEventListener("offline",function(){setNetMode("offline");setModeToast("📡 Cellular Mode");setTimeout(function(){setModeToast("")},3000)});
     return function(){clearInterval(i)};
   },[]);
-  // Demo toggle: tap status bar to simulate mode switch
-  var toggleMode=function(){setNetMode(function(p){var n=p==="online"?"offline":"online";setModeToast(n==="online"?"🌐 Back Online — Global access restored":"📡 Switched to Cellular Mode — India only");setTimeout(function(){setModeToast("")},3000);return n})};
-  var nav=function(k){if(k==="chats")setScreen("chatList");else if(k==="translate")setScreen("langSettings");else if(k==="tools")setScreen("supertools");else if(k==="sos"||k==="walkie"||k==="vault"||k==="pay"||k==="mesh"||k==="alert")setScreen(k);else setScreen("chatList")};
+  var toggleMode=function(){setNetMode(function(p){var n=p==="online"?"offline":"online";setModeToast(n==="online"?"🌐 Back Online":"📡 Cellular Mode");setTimeout(function(){setModeToast("")},3000);return n})};
+  var nav=function(k){if(k==="chats")setScreen("chatList");else if(k==="calls")setScreen("calls");else if(k==="entertainment")setScreen("entertainment");else if(k==="translate")setScreen("langSettings");else if(k==="tools")setScreen("supertools");else if(k==="settings")setScreen("settings");else if(k==="sos"||k==="walkie"||k==="vault"||k==="pay"||k==="mesh"||k==="alert")setScreen(k);else setScreen("chatList")};
   return (<div style={{height:"100vh",width:"100vw",background:C.bg,overflow:"hidden",position:"relative",paddingTop:"env(safe-area-inset-top,0)"}}>
     {screen==="splash"&&<Splash onDone={function(){setScreen("chatList")}}/>}
     {screen==="chatList"&&<ChatList myLang={myLang} netMode={netMode} translateSettings={translateSettings} onToggle={toggleMode} onSelect={function(c){setChat(c);setScreen("chat")}} onNav={nav}/>}
-    {screen==="chat"&&chat&&<ChatView contact={chat} myLang={myLang} netMode={netMode} translateSettings={translateSettings} onSetTranslate={setTranslate} onBack={function(){setScreen("chatList")}}/>}
+    {screen==="calls"&&<CallsScreen netMode={netMode} onNav={nav}/>}
+    {screen==="entertainment"&&<EntertainmentScreen netMode={netMode} onNav={nav}/>}
+    {screen==="chat"&&chat&&<ChatView contact={chat} myLang={myLang} netMode={netMode} translateSettings={translateSettings} onSetTranslate={setTranslate} onBack={function(){setScreen("chatList")}} onOpenProfile={function(){setScreen("profile")}}/>}
+    {screen==="profile"&&chat&&<ContactProfile contact={chat} netMode={netMode} locSettings={locSettings} onToggleLoc={toggleLoc} onBack={function(){setScreen("chat")}}/>}
     {screen==="langSettings"&&<LS myLang={myLang} netMode={netMode} onChange={setMyLang} onBack={nav}/>}
+    {screen==="settings"&&<SettingsScreen netMode={netMode} myLang={myLang} onChangeLang={setMyLang} onBack={nav}/>}
     {screen==="supertools"&&<SuperTools netMode={netMode} onBack={nav} onOpen={nav}/>}
     {screen==="sos"&&<SOS netMode={netMode} onBack={function(){setScreen("supertools")}}/>}
     {screen==="walkie"&&<Walkie netMode={netMode} onBack={function(){setScreen("supertools")}}/>}
